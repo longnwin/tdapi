@@ -1,0 +1,35 @@
+{
+    "name": "tdapi",
+    "version": "0.1.0",
+    "description": "A strongly typed Node.js module for interacting with TD Ameritrade's REST APIs",
+    "main": "dist/index.ts",
+    "types": "dist/index.d.ts",
+    "scripts": {
+    },
+    "repository": {
+      "type": "git",
+      "url": "git+https://github.com/longnwin/tdapi.git"
+    },
+    "keywords": [
+      "typescript",
+      "nodejs",
+      "api",
+      "stocks",
+      "td",
+      "tda",
+      "td ameritrade",
+      "td api"
+    ],
+    "author": "Long Nguyen <hello@longnwin.com>",
+    "license": "MIT",
+    "bugs": {
+      "url": "https://github.com/longnwin/tdapi/issues"
+    },
+    "homepage": "https://github.com/longnwin/tdapi#readme",
+    "devDependencies": {
+
+    },
+    "files": [
+      "lib/"
+    ]
+  }
