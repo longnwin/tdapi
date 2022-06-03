@@ -1,0 +1,1 @@
+export type Currency = "USD" | "CAD" | "EUR" | "JPY";
