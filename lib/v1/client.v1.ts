@@ -1,19 +1,31 @@
-import { AxiosInstance } from "axios";
-import { GetAccountRequestSchema } from "./@schemas/accounts.schema";
+import { GetAccountRequestSchema } from "~/@schemas/accounts.schema";
 import {
+  ClientState,
   GetAccountRequest,
   GetAccountResponse,
   GetAccountsResponse,
-} from "./@types/accounts.types";
-import { Order } from "./@types/orders";
+  Order,
+} from "..";
+import { TDReadOnlyApiV1 } from "./client.v1.readonly";
 
-export class TDApiV1 {
+export class TDApiV1 extends TDReadOnlyApiV1 {
   protected ACCOUNTS_PATH = "/v1/accounts";
-  protected httpClient: AxiosInstance;
+  protected state: ClientState;
+  private _ready: boolean = false;
+  constructor(state: ClientState) {
+    super();
+    this.state = state;
+    this.initAuthorization();
+    this.httpClient.interceptors.request.use((config) => {
+      if (config.headers && state.authorization?.authorized) {
+        config.headers.Authorization = `Bearer ${state.authorization.accessToken}`;
+      }
 
-  constructor(httpClient: AxiosInstance) {
-    this.httpClient = httpClient;
+      return config;
+    });
   }
+
+  ready = (): boolean => this._ready;
 
   // Accounts and Trading API
   // @see https://developer.tdameritrade.com/account-access/apis
@@ -24,6 +36,7 @@ export class TDApiV1 {
     params: GetAccountRequest
   ): Promise<GetAccountResponse> => {
     try {
+      this.checkClientReady();
       const { accountId, fields } = GetAccountRequestSchema.parse(params);
 
       let path = `${this.ACCOUNTS_PATH}/${accountId}`;
@@ -41,6 +54,7 @@ export class TDApiV1 {
    */
   getAccounts = async (): Promise<GetAccountsResponse> => {
     try {
+      this.checkClientReady();
       const resp = await this.httpClient.get<GetAccountsResponse>(
         this.ACCOUNTS_PATH
       );
@@ -122,77 +136,6 @@ export class TDApiV1 {
   replaceSavedOrder = () => {};
   // END Accounts and Trading API
 
-  // Authentication API
-  // @see https://developer.tdameritrade.com/authentication/apis
-  /**
-   * The token endpoint returns an access token along with an optional refresh token.
-   */
-  postAccessToken = () => {};
-  // END Authentication API
-
-  // Instruments API
-  // @see https://developer.tdameritrade.com/instruments/apis
-  /**
-   * Search or retrieve instrument data, including fundamental data.
-   */
-  searchInstruments = () => {};
-
-  /**
-   * Get an instrument by CUSIP.
-   */
-  getInstruments = () => {};
-  // END Instruments API
-
-  // Market Hours API
-  // @see https://developer.tdameritrade.com/market-hours/apis
-  /**
-   * Retrieve market hours for specified markets.
-   */
-  getHoursForMultipleMarkets = () => {};
-
-  /**
-   * Retrieve market hours for specified single market.
-   */
-  getHoursForSingleMarket = () => {};
-  // END Market Hours API
-
-  // Movers API
-  // @see https://developer.tdameritrade.com/movers/apis
-  /**
-   * Top 10 (up or down) movers by value or percent for a particular market
-   */
-  getMovers = () => {};
-  // END Movers API
-
-  // Option Chains API
-  // @see https://developer.tdameritrade.com/option-chains/apis
-  /**
-   * Get option chain for an optionable Symbol
-   */
-  getOptionChain = () => {};
-  // END Option Chains API
-
-  // Price History API
-  // @see https://developer.tdameritrade.com/price-history/apis
-  /**
-   * Get price history for a symbol
-   */
-  getPriceHistory = () => {};
-  // END Price History API
-
-  // Quotes API
-  // @see https://developer.tdameritrade.com/quotes/apis
-  /**
-   * Get quote for a symbol
-   */
-  getQuote = () => {};
-
-  /**
-   * Get quote for one or more symbols
-   */
-  getQuotes = () => {};
-  // END Quotes API
-
   // Transaction History API
   // @see https://developer.tdameritrade.com/transaction-history/apis
   /**
@@ -271,4 +214,29 @@ export class TDApiV1 {
    */
   replaceWatchlist = () => {};
   // End Watchlists API
+
+  // private functions
+  private initAuthorization = async () => {
+    if (this.state.refreshToken) {
+      const { access_token, expires_in } = await this.postAccessToken({
+        grant_type: "refresh_token",
+        refresh_token: this.state.refreshToken,
+        client_id: this.state.clientId,
+      });
+
+      this.state.authorization = {
+        authorized: expires_in > 0,
+        expiresIn: expires_in,
+        accessToken: access_token,
+      };
+
+      this._ready = true;
+    }
+  };
+
+  private checkClientReady = () => {
+    if (!this._ready) {
+      throw new Error("Client isn't ready!");
+    }
+  }
 }

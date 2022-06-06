@@ -1,16 +1,19 @@
 {
-    "compilerOptions": {
-        "module": "commonjs",
-        "moduleResolution": "node",
-        "esModuleInterop": true,
-        "baseUrl": ".",
-        "outDir": "dist",
-        "paths": {
-            "~/*": ["src/*"]
-        },
-        "target": "es2017",
-        "lib": ["es2017"],
-        "strict": true   
+  "compilerOptions": {
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "baseUrl": ".",
+    "outDir": "dist",
+    "paths": {
+      "~/*": ["lib/*"]
     },
-    "include": ["lib/**/*"]
+    "target": "es2017",
+    "lib": ["es2017"],
+    "strict": true,
+    "declaration": true,
+    "skipLibCheck": true,
+    "experimentalDecorators": true
+  },
+  "include": ["lib/**/*"]
 }
