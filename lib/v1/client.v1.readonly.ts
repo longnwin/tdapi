@@ -2,13 +2,26 @@ import axios, { AxiosInstance } from "axios";
 import qs from "qs";
 import { GetAccessTokenSchema } from "~/@schemas/authentication.schema";
 import {
+  GetMarketHoursSchema,
+  GetMultipleMarketHoursSchema,
+  GetOptionChainSchema,
+} from "~/@schemas/market-data.schema";
+import {
   GetAccessTokenRequest,
   GetAccessTokenResponse,
 } from "~/@types/authentication.types";
+import {
+  GetMarketHoursRequest,
+  GetMarketHoursResponse,
+  GetMultipleMarketHoursRequest,
+  GetOptionChainRequest,
+  OptionChainResponse,
+} from "~/@types/market-data.types";
 import { BASE_API_HOST, BASE_API_URL } from "~/globals";
 
 export abstract class TDReadOnlyApiV1 {
   protected OAUTH_PATH = "/v1/oauth2";
+  protected MARKET_DATA_PATH = "/v1/marketdata";
   protected httpClient: AxiosInstance;
   protected constructor() {
     this.httpClient = axios.create({
@@ -32,8 +45,8 @@ export abstract class TDReadOnlyApiV1 {
   postAccessToken = async (
     params: GetAccessTokenRequest
   ): Promise<GetAccessTokenResponse> => {
-    GetAccessTokenSchema.parse(params);
     try {
+      GetAccessTokenSchema.parse(params);
       const resp = await this.httpClient.post<GetAccessTokenResponse>(
         `${this.OAUTH_PATH}/token`,
         qs.stringify(params)
@@ -63,12 +76,39 @@ export abstract class TDReadOnlyApiV1 {
   /**
    * Retrieve market hours for specified markets.
    */
-  getHoursForMultipleMarkets = () => {};
+  getHoursForMultipleMarkets = async (
+    params: GetMultipleMarketHoursRequest
+  ): Promise<GetMarketHoursResponse> => {
+    try {
+      const { markets, ...query } = GetMultipleMarketHoursSchema.parse(params);
+      const resp = await this.httpClient.get<GetMarketHoursResponse>(
+        `${this.MARKET_DATA_PATH}/hours?${qs.stringify({
+          ...query,
+          markets: markets.join(","),
+        })}`
+      );
+      return resp.data;
+    } catch (err) {
+      throw err;
+    }
+  };
 
   /**
    * Retrieve market hours for specified single market.
    */
-  getHoursForSingleMarket = () => {};
+  getHoursForSingleMarket = async (
+    params: GetMarketHoursRequest
+  ): Promise<GetMarketHoursResponse> => {
+    try {
+      const { market, ...query } = GetMarketHoursSchema.parse(params);
+      const resp = await this.httpClient.get<GetMarketHoursResponse>(
+        `${this.MARKET_DATA_PATH}/${market}/hours?${qs.stringify(query)}`
+      );
+      return resp.data;
+    } catch (err) {
+      throw err;
+    }
+  };
   // END Market Hours API
 
   // Movers API
@@ -84,7 +124,17 @@ export abstract class TDReadOnlyApiV1 {
   /**
    * Get option chain for an optionable Symbol
    */
-  getOptionChain = () => {};
+  getOptionChain = async (params: GetOptionChainRequest): Promise<OptionChainResponse> => {
+    try {
+      GetOptionChainSchema.parse(params);
+      const resp = await this.httpClient.get<OptionChainResponse>(
+        `${this.MARKET_DATA_PATH}/chains?${qs.stringify(params)}`
+      );
+      return resp.data;
+    } catch (err) {
+      throw err;
+    }
+  };
   // END Option Chains API
 
   // Price History API

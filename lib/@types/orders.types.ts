@@ -135,6 +135,7 @@ interface ExecutionLeg {
   price: number;
   time: string;
 }
+
 interface Execution extends OrderActivity {
   executionType: ExecutionType;
   quantity: number;
