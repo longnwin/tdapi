@@ -2,6 +2,10 @@ import axios, { AxiosInstance } from "axios";
 import qs from "qs";
 import { GetAccessTokenSchema } from "~/@schemas/authentication.schema";
 import {
+  GetInstrumentsSchema,
+  SearchInstrumentsSchema,
+} from "~/@schemas/instruments.schema";
+import {
   GetMarketHoursSchema,
   GetMultipleMarketHoursSchema,
   GetOptionChainSchema,
@@ -18,10 +22,17 @@ import {
   OptionChainResponse,
 } from "~/@types/market-data.types";
 import { BASE_API_HOST, BASE_API_URL } from "~/globals";
+import {
+  GetInstrumentsReponse,
+  GetInstrumentsRequest,
+  SearchInstrumentsRequest,
+  SearchInstrumentsResponse,
+} from "~/@types/instruments.types";
 
 export abstract class TDReadOnlyApiV1 {
   protected OAUTH_PATH = "/v1/oauth2";
   protected MARKET_DATA_PATH = "/v1/marketdata";
+  protected INSTRUMENTS_PATH = "/v1/instruments";
   protected httpClient: AxiosInstance;
   protected constructor() {
     this.httpClient = axios.create({
@@ -63,12 +74,34 @@ export abstract class TDReadOnlyApiV1 {
   /**
    * Search or retrieve instrument data, including fundamental data.
    */
-  searchInstruments = () => {};
+  searchInstruments = async (
+    params: SearchInstrumentsRequest
+  ): Promise<SearchInstrumentsResponse> => {
+    try {
+      SearchInstrumentsSchema.parse(params);
+      const resp = await this.httpClient.get<SearchInstrumentsResponse>(
+        `${this.INSTRUMENTS_PATH}?${qs.stringify(params)}`
+      );
+      return resp.data;
+    } catch (err) {
+      throw err;
+    }
+  };
 
   /**
    * Get an instrument by CUSIP.
    */
-  getInstruments = () => {};
+  getInstruments = async (params: GetInstrumentsRequest) => {
+    try {
+      const { cusip, ...query } = GetInstrumentsSchema.parse(params);
+      const resp = await this.httpClient.get<GetInstrumentsReponse>(
+        `${this.INSTRUMENTS_PATH}/${cusip}?${qs.stringify(query)}`
+      );
+      return resp.data;
+    } catch (err) {
+      throw err;
+    }
+  };
   // END Instruments API
 
   // Market Hours API
@@ -124,7 +157,9 @@ export abstract class TDReadOnlyApiV1 {
   /**
    * Get option chain for an optionable Symbol
    */
-  getOptionChain = async (params: GetOptionChainRequest): Promise<OptionChainResponse> => {
+  getOptionChain = async (
+    params: GetOptionChainRequest
+  ): Promise<OptionChainResponse> => {
     try {
       GetOptionChainSchema.parse(params);
       const resp = await this.httpClient.get<OptionChainResponse>(
