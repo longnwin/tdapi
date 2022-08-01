@@ -4,7 +4,7 @@ import {
   Equity,
   FixedIncome,
   MutualFund,
-  Option,
+  OptionInstrument,
 } from "./instruments.types";
 export type Session = "NORMAL" | "AM" | "PM" | "SEAMLESS";
 export type Duration = "DAY" | "GOOD_TILL_CANCEl" | "FILL_OR_KILL";
@@ -115,7 +115,7 @@ interface CancelTime {
 }
 
 interface OrderLeg {
-  instrument: Equity | FixedIncome | MutualFund | CashEquivalent | Option;
+  instrument: Equity | FixedIncome | MutualFund | CashEquivalent | OptionInstrument;
   instruction: Instruction;
   quantiy: number;
   legId?: number;

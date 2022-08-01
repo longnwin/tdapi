@@ -7,8 +7,10 @@ import {
 } from "~/@schemas/instruments.schema";
 import {
   GetMarketHoursSchema,
+  GetMoversSchema,
   GetMultipleMarketHoursSchema,
   GetOptionChainSchema,
+  GetPriceHistorySchema,
 } from "~/@schemas/market-data.schema";
 import {
   GetAccessTokenRequest,
@@ -17,9 +19,13 @@ import {
 import {
   GetMarketHoursRequest,
   GetMarketHoursResponse,
+  GetMoversRequest,
+  GetMoversResponse,
   GetMultipleMarketHoursRequest,
   GetOptionChainRequest,
-  OptionChainResponse,
+  GetPriceHistoryRequest,
+  GetPriceHistoryResponse,
+  GetOptionChainResponse,
 } from "~/@types/market-data.types";
 import { BASE_API_HOST, BASE_API_URL } from "~/globals";
 import {
@@ -149,7 +155,17 @@ export abstract class TDReadOnlyApiV1 {
   /**
    * Top 10 (up or down) movers by value or percent for a particular market
    */
-  getMovers = () => {};
+  getMovers = async (params: GetMoversRequest): Promise<GetMoversResponse> => {
+    try {
+      const { index, ...query } = GetMoversSchema.parse(params);
+      const resp = await this.httpClient.get<GetMoversResponse>(
+        `${this.MARKET_DATA_PATH}/${index}/movers?${qs.stringify(query)}`
+      );
+      return resp.data;
+    } catch (err) {
+      throw err;
+    }
+  };
   // END Movers API
 
   // Option Chains API
@@ -159,10 +175,10 @@ export abstract class TDReadOnlyApiV1 {
    */
   getOptionChain = async (
     params: GetOptionChainRequest
-  ): Promise<OptionChainResponse> => {
+  ): Promise<GetOptionChainResponse> => {
     try {
       GetOptionChainSchema.parse(params);
-      const resp = await this.httpClient.get<OptionChainResponse>(
+      const resp = await this.httpClient.get<GetOptionChainResponse>(
         `${this.MARKET_DATA_PATH}/chains?${qs.stringify(params)}`
       );
       return resp.data;
@@ -177,7 +193,19 @@ export abstract class TDReadOnlyApiV1 {
   /**
    * Get price history for a symbol
    */
-  getPriceHistory = () => {};
+  getPriceHistory = async (
+    params: GetPriceHistoryRequest
+  ): Promise<GetPriceHistoryResponse> => {
+    try {
+      const { symbol, ...query } = GetPriceHistorySchema.parse(params);
+      const resp = await this.httpClient.get<GetPriceHistoryResponse>(
+        `${this.MARKET_DATA_PATH}/${symbol}/pricehistory?${qs.stringify(query)}`
+      );
+      return resp.data;
+    } catch (err) {
+      throw err;
+    }
+  };
   // END Price History API
 
   // Quotes API

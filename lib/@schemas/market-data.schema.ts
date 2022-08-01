@@ -1,9 +1,10 @@
 import { z } from "zod";
 import {
   GetMarketHoursRequest,
+  GetMoversRequest,
   GetMultipleMarketHoursRequest,
   GetOptionChainRequest,
-  MarketMap,
+  GetPriceHistoryRequest,
   MarketType,
   OptionStrategyType,
 } from "~/@types/market-data.types";
@@ -93,5 +94,40 @@ export const GetOptionChainSchema: z.ZodSchema<GetOptionChainRequest> = z.object
       ])
       .optional(),
     optionType: z.union([z.literal("S"), z.literal("NS"), z.literal("ALL")]),
+  }
+);
+
+export const GetMoversSchema: z.ZodSchema<GetMoversRequest> = z.object({
+  apiKey: z.string(),
+  index: z.union([z.literal("$COMPX"), z.literal("$DJI"), z.literal("$SPX.X")]),
+  direction: z.union([z.literal("up"), z.literal("down")]),
+  change: z.union([z.literal("percent"), z.literal("value")]),
+});
+
+export const GetPriceHistorySchema: z.ZodSchema<GetPriceHistoryRequest> = z.object(
+  {
+    apiKey: z.string(),
+    symbol: z.string(),
+    periodType: z
+      .union([
+        z.literal("day"),
+        z.literal("month"),
+        z.literal("year"),
+        z.literal("ytd"),
+      ])
+      .optional(),
+    period: z.number().optional(),
+    frequencyType: z
+      .union([
+        z.literal("day"),
+        z.literal("month"),
+        z.literal("year"),
+        z.literal("ytd"),
+      ])
+      .optional(),
+    frequency: z.number().optional(),
+    endDate: z.number().optional(),
+    startDate: z.number().optional(),
+    needExtendedHoursData: z.boolean().optional(),
   }
 );

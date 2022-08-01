@@ -97,7 +97,7 @@ export interface GetOptionChainRequest {
   optionType?: "S" | "NS" | "ALL";
 }
 
-export interface OptionChainResponse {
+export interface GetOptionChainResponse {
   symbol: string;
   status: string;
   underlying: OptionChainUnderlying;
@@ -191,4 +191,49 @@ interface OptionExpirationDateMap {
 
 interface OptionStrikeMap {
   [strike: string]: Option[];
+}
+
+export interface GetMoversRequest {
+  apiKey: string;
+  index: "$COMPX" | "$DJI" | "$SPX.X";
+  direction: "up" | "down";
+  change: "percent" | "value";
+}
+
+interface Mover {
+  change: number;
+  description: string;
+  direction: "up" | "down";
+  last: number;
+  symbole: string;
+  totalVolume: number;
+}
+
+export type GetMoversResponse = Mover[];
+
+export interface GetPriceHistoryRequest {
+  apiKey: string;
+  symbol: string;
+  periodType?: "day" | "month" | "year" | "ytd";
+  period?: number;
+  frequencyType?: "day" | "month" | "year" | "ytd";
+  frequency?: number;
+  endDate?: number;
+  startDate?: number;
+  needExtendedHoursData?: boolean;
+}
+
+export interface GetPriceHistoryResponse {
+  candles: Candle[];
+  empty: boolean;
+  symbol: string;
+}
+
+interface Candle {
+  close: number;
+  datetime: number;
+  high: number;
+  low: number;
+  open: number;
+  volume: number;
 }

@@ -1,4 +1,4 @@
-import { CashEquivalent, Equity, FixedIncome, MutualFund, Option } from "./instruments.types";
+import { CashEquivalent, Equity, FixedIncome, MutualFund, OptionInstrument } from "./instruments.types";
 
 export type GetAccountRequestField = "positions" | "orders";
 
@@ -38,7 +38,7 @@ interface AccountPosition {
     settledLongQuantity: number;
     settledShortQuantity: number;
     agedQuantity: number;
-    instrument: Equity | FixedIncome | MutualFund | CashEquivalent | Option;
+    instrument: Equity | FixedIncome | MutualFund | CashEquivalent | OptionInstrument;
     marketValue: number;
 }
 
