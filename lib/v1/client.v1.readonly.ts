@@ -1,6 +1,4 @@
-import axios, { AxiosInstance } from "axios";
 import qs from "qs";
-import { GetAccessTokenSchema } from "~/@schemas/authentication.schema";
 import {
   GetInstrumentsSchema,
   SearchInstrumentsSchema,
@@ -13,10 +11,6 @@ import {
   GetPriceHistorySchema,
 } from "~/@schemas/market-data.schema";
 import {
-  GetAccessTokenRequest,
-  GetAccessTokenResponse,
-} from "~/@types/authentication.types";
-import {
   GetMarketHoursRequest,
   GetMarketHoursResponse,
   GetMoversRequest,
@@ -27,53 +21,22 @@ import {
   GetPriceHistoryResponse,
   GetOptionChainResponse,
 } from "~/@types/market-data.types";
-import { BASE_API_HOST, BASE_API_URL } from "~/globals";
 import {
   GetInstrumentsReponse,
   GetInstrumentsRequest,
   SearchInstrumentsRequest,
   SearchInstrumentsResponse,
 } from "~/@types/instruments.types";
+import { ClientState } from "..";
+import { BaseClient } from "~/base";
 
-export abstract class TDReadOnlyApiV1 {
+export abstract class TDReadOnlyApiV1 extends BaseClient {
   protected OAUTH_PATH = "/v1/oauth2";
   protected MARKET_DATA_PATH = "/v1/marketdata";
   protected INSTRUMENTS_PATH = "/v1/instruments";
-  protected httpClient: AxiosInstance;
-  protected constructor() {
-    this.httpClient = axios.create({
-      baseURL: BASE_API_URL,
-      headers: {
-        Accept: "*/*",
-        Host: BASE_API_HOST,
-        "Sec-Fetch-Dest": "empty",
-        "Sec-Fetch-Mode": "cors",
-        "Sec-Fetch-Site": "same-site",
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-    });
+  protected constructor(state: ClientState) {
+    super(state);
   }
-
-  // Authentication API
-  // @see https://developer.tdameritrade.com/authentication/apis
-  /**
-   * The token endpoint returns an access token along with an optional refresh token.
-   */
-  postAccessToken = async (
-    params: GetAccessTokenRequest
-  ): Promise<GetAccessTokenResponse> => {
-    try {
-      GetAccessTokenSchema.parse(params);
-      const resp = await this.httpClient.post<GetAccessTokenResponse>(
-        `${this.OAUTH_PATH}/token`,
-        qs.stringify(params)
-      );
-      return resp.data;
-    } catch (err) {
-      throw err;
-    }
-  };
-  // END Authentication API
 
   // Instruments API
   // @see https://developer.tdameritrade.com/instruments/apis
@@ -86,7 +49,9 @@ export abstract class TDReadOnlyApiV1 {
     try {
       SearchInstrumentsSchema.parse(params);
       const resp = await this.httpClient.get<SearchInstrumentsResponse>(
-        `${this.INSTRUMENTS_PATH}?${qs.stringify(params)}`
+        `${this.INSTRUMENTS_PATH}?${qs.stringify(
+          this.withApiKey<SearchInstrumentsRequest>(params)
+        )}`
       );
       return resp.data;
     } catch (err) {
@@ -99,9 +64,9 @@ export abstract class TDReadOnlyApiV1 {
    */
   getInstruments = async (params: GetInstrumentsRequest) => {
     try {
-      const { cusip, ...query } = GetInstrumentsSchema.parse(params);
+      const { cusip } = GetInstrumentsSchema.parse(params);
       const resp = await this.httpClient.get<GetInstrumentsReponse>(
-        `${this.INSTRUMENTS_PATH}/${cusip}?${qs.stringify(query)}`
+        `${this.INSTRUMENTS_PATH}/${cusip}?${qs.stringify(this.withApiKey())}`
       );
       return resp.data;
     } catch (err) {
@@ -141,7 +106,9 @@ export abstract class TDReadOnlyApiV1 {
     try {
       const { market, ...query } = GetMarketHoursSchema.parse(params);
       const resp = await this.httpClient.get<GetMarketHoursResponse>(
-        `${this.MARKET_DATA_PATH}/${market}/hours?${qs.stringify(query)}`
+        `${this.MARKET_DATA_PATH}/${market}/hours?${qs.stringify(
+          this.withApiKey<Omit<GetMarketHoursRequest, "market">>(query)
+        )}`
       );
       return resp.data;
     } catch (err) {
@@ -159,7 +126,9 @@ export abstract class TDReadOnlyApiV1 {
     try {
       const { index, ...query } = GetMoversSchema.parse(params);
       const resp = await this.httpClient.get<GetMoversResponse>(
-        `${this.MARKET_DATA_PATH}/${index}/movers?${qs.stringify(query)}`
+        `${this.MARKET_DATA_PATH}/${index}/movers?${qs.stringify(
+          this.withApiKey<Omit<GetMoversRequest, "index">>(query)
+        )}`
       );
       return resp.data;
     } catch (err) {
@@ -179,7 +148,9 @@ export abstract class TDReadOnlyApiV1 {
     try {
       GetOptionChainSchema.parse(params);
       const resp = await this.httpClient.get<GetOptionChainResponse>(
-        `${this.MARKET_DATA_PATH}/chains?${qs.stringify(params)}`
+        `${this.MARKET_DATA_PATH}/chains?${qs.stringify(
+          this.withApiKey<GetOptionChainRequest>(params)
+        )}`
       );
       return resp.data;
     } catch (err) {
@@ -199,7 +170,9 @@ export abstract class TDReadOnlyApiV1 {
     try {
       const { symbol, ...query } = GetPriceHistorySchema.parse(params);
       const resp = await this.httpClient.get<GetPriceHistoryResponse>(
-        `${this.MARKET_DATA_PATH}/${symbol}/pricehistory?${qs.stringify(query)}`
+        `${this.MARKET_DATA_PATH}/${symbol}/pricehistory?${qs.stringify(
+          this.withApiKey<Omit<GetPriceHistoryRequest, "symbol">>(query)
+        )}`
       );
       return resp.data;
     } catch (err) {

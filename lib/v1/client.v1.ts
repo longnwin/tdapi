@@ -1,4 +1,7 @@
+import qs from "qs";
 import { GetAccountRequestSchema } from "~/@schemas/accounts.schema";
+import { GetAccessTokenSchema } from "~/@schemas/authentication.schema";
+import { GetAccessTokenRequest, GetAccessTokenResponse } from "~/@types/authentication.types";
 import {
   ClientState,
   GetAccountRequest,
@@ -10,12 +13,10 @@ import { TDReadOnlyApiV1 } from "./client.v1.readonly";
 
 export class TDApiV1 extends TDReadOnlyApiV1 {
   protected ACCOUNTS_PATH = "/v1/accounts";
-  protected state: ClientState;
-  private _ready: boolean = false;
+  private _ready: Promise<boolean>;
   constructor(state: ClientState) {
-    super();
-    this.state = state;
-    this.initAuthorization();
+    super(state);
+    this._ready = this.initAuthorization();
     this.httpClient.interceptors.request.use((config) => {
       if (config.headers && state.authorization?.authorized) {
         config.headers.Authorization = `Bearer ${state.authorization.accessToken}`;
@@ -25,7 +26,28 @@ export class TDApiV1 extends TDReadOnlyApiV1 {
     });
   }
 
-  ready = (): boolean => this._ready;
+  ready = (): Promise<boolean> => this._ready;
+
+  // Authentication API
+  // @see https://developer.tdameritrade.com/authentication/apis
+  /**
+   * The token endpoint returns an access token along with an optional refresh token.
+   */
+   postAccessToken = async (
+    params: GetAccessTokenRequest
+  ): Promise<GetAccessTokenResponse> => {
+    try {
+      GetAccessTokenSchema.parse(params);
+      const resp = await this.httpClient.post<GetAccessTokenResponse>(
+        `${this.OAUTH_PATH}/token`,
+        qs.stringify(params)
+      );
+      return resp.data;
+    } catch (err) {
+      throw err;
+    }
+  };
+  // END Authentication API
 
   // Accounts and Trading API
   // @see https://developer.tdameritrade.com/account-access/apis
@@ -230,8 +252,10 @@ export class TDApiV1 extends TDReadOnlyApiV1 {
         accessToken: access_token,
       };
 
-      this._ready = true;
+      return true;
     }
+
+    return false;
   };
 
   private checkClientReady = () => {

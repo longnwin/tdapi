@@ -131,7 +131,6 @@ export interface Fundamental extends Instrument {
 }
 
 export interface SearchInstrumentsRequest {
-  apiKey: string;
   symbol: string;
   projection: InstrumentProjectionType;
 }
@@ -141,7 +140,6 @@ export interface SearchInstrumentsResponse {
 }
 
 export interface GetInstrumentsRequest {
-  apiKey: string;
   cusip: string;
 }
 

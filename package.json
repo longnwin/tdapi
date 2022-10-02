@@ -1,6 +1,6 @@
 {
   "name": "node-tdapi",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "A strongly typed Node.js module for interacting with TD Ameritrade's REST APIs",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

@@ -51,7 +51,6 @@ export interface MarketHoursSession {
 }
 
 export interface GetMarketHoursRequest {
-  apikey: string;
   date?: string;
   market: MarketType;
 }
@@ -66,7 +65,6 @@ export interface GetMarketHoursResponse {
 }
 
 export interface GetOptionChainRequest {
-  apikey: string;
   symbol: string;
   contractType?: PutCall | "ALL";
   strikeCount?: number;
@@ -194,7 +192,6 @@ interface OptionStrikeMap {
 }
 
 export interface GetMoversRequest {
-  apiKey: string;
   index: "$COMPX" | "$DJI" | "$SPX.X";
   direction: "up" | "down";
   change: "percent" | "value";
@@ -212,7 +209,6 @@ interface Mover {
 export type GetMoversResponse = Mover[];
 
 export interface GetPriceHistoryRequest {
-  apiKey: string;
   symbol: string;
   periodType?: "day" | "month" | "year" | "ytd";
   period?: number;

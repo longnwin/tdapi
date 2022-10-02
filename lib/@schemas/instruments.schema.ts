@@ -14,13 +14,11 @@ export const InstrumentProjectionSchema = z.union([
 
 export const SearchInstrumentsSchema: z.ZodSchema<SearchInstrumentsRequest> = z.object(
   {
-    apiKey: z.string(),
     symbol: z.string(),
     projection: InstrumentProjectionSchema,
   }
 );
 
 export const GetInstrumentsSchema: z.ZodSchema<GetInstrumentsRequest> = z.object({
-  apiKey: z.string(),
   cusip: z.string(),
 });

@@ -34,7 +34,6 @@ export const OptionStrategySchema: z.ZodSchema<OptionStrategyType> = z.union([
 
 export const GetMarketHoursSchema: z.ZodSchema<GetMarketHoursRequest> = z.object(
   {
-    apikey: z.string(),
     market: MarketTypeSchema,
     date: z.string().optional(),
   }
@@ -50,7 +49,6 @@ export const GetMultipleMarketHoursSchema: z.ZodSchema<GetMultipleMarketHoursReq
 
 export const GetOptionChainSchema: z.ZodSchema<GetOptionChainRequest> = z.object(
   {
-    apikey: z.string(),
     symbol: z.string(),
     contractType: z
       .union([z.literal("CALL"), z.literal("PUT"), z.literal("ALL")])
@@ -98,7 +96,6 @@ export const GetOptionChainSchema: z.ZodSchema<GetOptionChainRequest> = z.object
 );
 
 export const GetMoversSchema: z.ZodSchema<GetMoversRequest> = z.object({
-  apiKey: z.string(),
   index: z.union([z.literal("$COMPX"), z.literal("$DJI"), z.literal("$SPX.X")]),
   direction: z.union([z.literal("up"), z.literal("down")]),
   change: z.union([z.literal("percent"), z.literal("value")]),
