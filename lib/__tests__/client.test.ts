@@ -72,4 +72,13 @@ describe("Initializing a TDApi Client", () => {
       });
     });
   });
+
+  describe("with env vars set", () => {
+    it("should return a TDApi instance", async () => {
+      const client = new TDApi({});
+
+      expect(client.constructor.name).toEqual(TDApi.name);
+      expect(await client.v1.ready()).toBeTruthy();
+    });
+  });
 });

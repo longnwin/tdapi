@@ -58,7 +58,7 @@ export class TDApiV1 extends TDReadOnlyApiV1 {
     params: GetAccountRequest
   ): Promise<GetAccountResponse> => {
     try {
-      this.checkClientReady();
+      await this.checkClientReady();
       const { accountId, fields } = GetAccountRequestSchema.parse(params);
 
       let path = `${this.ACCOUNTS_PATH}/${accountId}`;
@@ -76,7 +76,7 @@ export class TDApiV1 extends TDReadOnlyApiV1 {
    */
   getAccounts = async (): Promise<GetAccountsResponse> => {
     try {
-      this.checkClientReady();
+      await this.checkClientReady();
       const resp = await this.httpClient.get<GetAccountsResponse>(
         this.ACCOUNTS_PATH
       );
@@ -258,8 +258,8 @@ export class TDApiV1 extends TDReadOnlyApiV1 {
     return false;
   };
 
-  private checkClientReady = () => {
-    if (!this._ready) {
+  private checkClientReady = async () => {
+    if (!(await this.ready())) {
       throw new Error("Client isn't ready!");
     }
   }
